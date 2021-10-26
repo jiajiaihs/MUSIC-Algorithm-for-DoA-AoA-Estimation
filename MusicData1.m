@@ -1,48 +1,47 @@
 clear all
 close all
 clc
-derad = pi/180; % ½Ç¶È->»¡¶È
-radeg = 180/pi; % »¡¶È->½Ç¶È
+derad = pi/180; % è§’åº¦->å¼§åº¦
+radeg = 180/pi; % å¼§åº¦->è§’åº¦
 twpi = 2*pi;
-kelm = 8;       % ÕóÔª¸öÊı   
-dd = 0.5;       % ÕóÔª¼ä¾à   
+kelm = 8;       % é˜µå…ƒä¸ªæ•°   
+dd = 0.5;       % é˜µå…ƒé—´è·   
 d=0:dd:(kelm-1)*dd;
-iwave = 3;      % ĞÅÔ´Êı
-theta = -60:0.5:60;  % MUSICÆ×·åËÑË÷µÄ·¶Î§
-snr = 10;            % ĞÅÔë±È
-n = 512;             % ¿ìÅÄÊı»òÕß³ÆÎª²ÉÑùÊı
-A=exp(-1i*twpi*d.'*sin(theta*derad)); % ·½ÏòÊ¸Á¿,·½ÏòÏòÁ¿,.'×ªÖÃ£¬'¹²éî×ªÖÃ
+iwave = 3;      % ä¿¡æºæ•°
+theta = -60:0.5:60;  % MUSICè°±å³°æœç´¢çš„èŒƒå›´
+snr = 10;            % ä¿¡å™ªæ¯”
+n = 512;             % å¿«æ‹æ•°æˆ–è€…ç§°ä¸ºé‡‡æ ·æ•°
+A=exp(-1i*twpi*d.'*sin(theta*derad)); % æ–¹å‘çŸ¢é‡,æ–¹å‘å‘é‡,.'è½¬ç½®ï¼Œ'å…±è½­è½¬ç½®
 iq = dlmread('data1.txt',',',1,0); 
-S = 1i*iq(1:2:end) + iq(2:2:end);     % ÕâÑù¾ÍÓĞĞé²¿Êµ²¿ÁË
+S = 1i*iq(1:2:end) + iq(2:2:end);     % è¿™æ ·å°±æœ‰è™šéƒ¨å®éƒ¨äº†
 X = reshape(S,kelm,n); 
-% X1 = awgn(X,snr,'measured');% ÔÚÌí¼ÓÔëÉùÇ°¼ÆËãĞÅºÅXµÄ¹¦ÂÊ(dBW)
-X1 = awgn(X,snr,'measured');
+X1 = awgn(X,snr,'measured');          % åœ¨æ·»åŠ å™ªå£°å‰è®¡ç®—ä¿¡å·Xçš„åŠŸç‡(dBW)
 Rxx = X1*X1'/n;
 InvS = inv(Rxx);
-[EV,D] = eig(Rxx);            % ÌØÕ÷Öµ·Ö½â
-EVA = diag(D)';               % ½«ÌØÕ÷Öµ¾ØÕó¶Ô½ÇÏßÌáÈ¡²¢×ªÎªÒ»ĞĞ
-[EVA,I] = sort(EVA);          % ½«ÌØÕ÷ÖµÅÅĞò£¬´ÓĞ¡µ½´ó
+[EV,D] = eig(Rxx);            % ç‰¹å¾å€¼åˆ†è§£
+EVA = diag(D)';               % å°†ç‰¹å¾å€¼çŸ©é˜µå¯¹è§’çº¿æå–å¹¶è½¬ä¸ºä¸€è¡Œ
+[EVA,I] = sort(EVA);          % å°†ç‰¹å¾å€¼æ’åºï¼Œä»å°åˆ°å¤§
 EVA = fliplr(EVA);
-EV = fliplr(EV(:,I));         % ¶ÔÓ¦ÌØÕ÷Ê¸Á¿ÅÅĞò
+EV = fliplr(EV(:,I));         % å¯¹åº”ç‰¹å¾çŸ¢é‡æ’åº
 
-% ±éÀúÃ¿¸ö½Ç¶È£¬¼ÆËã¿Õ¼äÆ×
+% éå†æ¯ä¸ªè§’åº¦ï¼Œè®¡ç®—ç©ºé—´è°±
 for iang = 1:361
-    angle(iang) = (iang-181)/2;    % ÏàÎ»½Ç
+    angle(iang) = (iang-181)/2;    % ç›¸ä½è§’
     phim = derad*angle(iang);
     a = exp(-1i*twpi*d*sin(phim)).';  
     L = iwave;
-    En=EV(:,L+1:kelm);             % µÃµ½ÔëÉù×Ó¿Õ¼ä
+    En=EV(:,L+1:kelm);             % å¾—åˆ°å™ªå£°å­ç©ºé—´
     SP(iang) = (a'*a)/(a'*En*En'*a);
 end 
 
-% ×÷Í¼
+% ä½œå›¾
 SP = abs(SP);
-SPmax = max(SP);             % Çó×î´óÖµº¯Êı
-SP = 10*log10(SP/SPmax);     % ¹éÒ»»¯´¦Àí
+SPmax = max(SP);             % æ±‚æœ€å¤§å€¼å‡½æ•°
+SP = 10*log10(SP/SPmax);     % å½’ä¸€åŒ–å¤„ç†
 h = plot(angle,SP);
 set(h,'Linewidth',2)
-xlabel('ÈëÉä½Çangle (degree)')
-ylabel('¿Õ¼äÆ×magnitude (dB)')
+xlabel('å…¥å°„è§’angle (degree)')
+ylabel('ç©ºé—´è°±magnitude (dB)')
 axis([-90 90 -60 0])
 set(gca, 'XTick',(-90:10:90))
 grid on     
